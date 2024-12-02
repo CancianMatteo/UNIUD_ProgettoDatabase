@@ -1,0 +1,59 @@
+\documentclass{report} % Specifica il tipo di documento
+\usepackage[utf8]{inputenc} % Codifica dei caratteri
+\usepackage[italian]{babel} % Lingua del documento
+
+\title{Relazione progetto Basi di Dati} % Titolo
+\author{Bozzetto Davide, Cancian Matteo, Del Pio Luogo Marco, Fabris Dorian} % Autore
+\date{\today} % Data, o lascialo vuoto per nascondere la data
+
+\begin{document}
+
+\maketitle % Genera il titolo
+
+\section{Introduzione}
+Come progetto del corso di Basi di Dati ci è stata assegnata da modellare la realtà di un'ufficio di Motorizzazione.
+
+\subsection{Analisi iniziale}
+Dopo un analisi e comprensione del testo, dei termini e dei requisiti, abbiamo deciso di iniziare a modellare la realtà con un diagramma Entità-Relazioni.
+TODO ...
+
+\subsection{Analisi e tabella volumi}
+\begin{table}[h!]
+\begin{tabular}{|l|l|l|l|}
+\hline
+Concetto & Tipo & Volume & Note \\
+\hline
+Produttore & E & 10 & \\
+Modello & E & 100 & \\
+Modello	& E	& 100 &Si assume che in media un produttore abbia 10 modelli di macchina. \\				
+Automobile & E & 50000 & In media un produttore produce 5000 macchine \\				
+Automobili registrate & E & 49400 & Qualche auto si perde, le ultime 100 "fresche di fabbrica" devono ancora essere registrate. \\			
+Rivenditore	& E & 50 & \\					
+Privati & E	& 10000	& \\				
+Gruppo privati & E & 2000 & \\					
+Parte coinvolta & E & 12000	& \\					
+Atto di proprieta iniziale & E & 49400 & \\						
+Atti di fornitura & E & 46930 & I produttori faranno in modo di distribuire ai rivenditori almeno il 95\% della produzione. \\					
+Atti di vendita & E & 44383 & I rivenditori faranno in modo di vendere ai clienti finali, più auto possibile, si suppone che ogni venditore tenga una scorta di circa 50 auto. \\			
+Atti di trasferimento & E & 74100 & Ogni auto immatricolata (venduta da un rivenditore) nella sua vita passa mediamente altri 1,5 proprietari (oltre all'acquirente iniziale). \\				
+Atti di proprieta & E & 214813 & \\						
+viene registrata & R & 49400 & \\						
+(Auto) è di un (Mod) & R & 50000 & \\					
+(Prod) crea (Auto) & R & 50000 & \\					
+(Prod) progetta (Mod) & R & 100	& \\					
+stipula produttore-fornitura & R & 46930 & \\						
+stipula rivenditore-fornitura & R & 46930 & \\						
+riferito a automobile-fornitura & R & 46930	& \\					
+stipula rivenditore-vendita & R & 44383	& \\					
+stipula parte coinvolta-vendita & R	& 44383 & \\						
+riferito a automobile-vendita & R & 44383 & \\					
+stipula p.c. venditore-trasferimento &R	& 74100 & \\					
+stipula p.c. acquirente-trasferimento & R & 74100 & \\					
+riferito a automobile-trasferimento & R	& 74100	& \\					
+firma produttore-proprieta iniziale & R & 49400	& \\					
+riferito a automobile-proprieta iniz. & R & 49400 & \\
+\hline
+\end{tabular}
+\end{table}
+
+\end{document}
