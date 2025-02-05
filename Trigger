@@ -1,0 +1,57 @@
+CREATE OR REPLACE FUNCTION specs_check()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.potenza < 6 THEN
+        RAISE EXCEPTION 'Errore: La potenza deve essere almeno 6 cavalli!';
+    END IF;
+
+    IF NEW.cilindrata < 400 OR NEW.cilindrata > 3000 THEN
+        RAISE EXCEPTION 'Errore: La cilindrata deve essere compresa tra 400 e 3000 cc!';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_specs_check
+BEFORE INSERT ON Modelli
+FOR EACH ROW
+EXECUTE FUNCTION specs_checks();
+
+
+
+CREATE OR REPLACE FUNCTION decrease_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.data_distruzione IS NULL AND NEW.data_distruzione IS NOT NULL THEN
+        UPDATE Produttori
+        SET n_auto_prodotte = n_auto_prodotte - 1
+        WHERE nome = (SELECT nome_produttore FROM Modelli WHERE nome = OLD.nome_modello);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_decrease_count
+AFTER UPDATE ON Automobili
+FOR EACH ROW
+EXECUTE FUNCTION decrease_count();
+
+
+
+CREATE OR REPLACE FUNCTION prevent_removal()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.data_distruzione IS NULL THEN
+        RAISE EXCEPTION 'Errore: Puoi eliminare solo auto che sono già state distrutte!';
+    END IF;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_removal
+BEFORE DELETE ON Automobili
+FOR EACH ROW
+EXECUTE FUNCTION prevent_removal();
