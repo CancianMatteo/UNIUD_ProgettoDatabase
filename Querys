@@ -32,5 +32,11 @@ select nomeModello
 from modelli_AutoDist MAD
 where MAD.numAutoDist >= ALL(select numAutoDist from modelli_AutoDist);
 
+query 6) Il modello tra tutti i produttori che ha più macchine prodotte
 
-
+SELECT nome_modello 
+FROM ( SELECT A.nome_modello, COUNT(A.nome_modello) as numero_auto
+       FROM Automobile A
+       GROUP BY A.nome_modello
+     )
+WHERE numero_auto = MAX(numero_auto);
