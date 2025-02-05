@@ -1,6 +1,7 @@
 \documentclass{report} % Specifica il tipo di documento
 \usepackage[utf8]{inputenc} % Codifica dei caratteri
 \usepackage[italian]{babel} % Lingua del documento
+\usepackage[a4paper, total={7.5in, 10in}]{geometry} % Riduce i margini
 
 \title{Relazione progetto Basi di Dati} % Titolo
 \author{Bozzetto Davide, Cancian Matteo, Del Pio Luogo Marco, Fabris Dorian} % Autore
@@ -55,5 +56,14 @@ riferito a automobile-proprieta iniz. & R & 49400 & \\
 \hline
 \end{tabular}
 \end{table}
+
+\subsection{Analisi ridondanze}
+Analizzando le relazioni tra le entità e i volumi, abbiamo trovato le seguenti possibili ridondanze:
+
+ - Auto prodotte (in produttore) \\
+ 
+ - Auto prodotte (in modello) \\
+ 
+ - Proprietario attuale (in automobile registrata) \\
 
 \end{document}
