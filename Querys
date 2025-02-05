@@ -25,7 +25,7 @@ query 5) Il modello o i modelli che hanno il maggior numero di auto distrutte:
 create view modelli_AutoDist(nomeModello,numAutoDist) as 
     select nome_modello, count(*) as numAutoDist
     from Automobile A
-    where A.data_distruzione <= current_date
+    where A.data_distruzione <> NULL
     group by nome_modello;
 
 select nomeModello 
