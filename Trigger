@@ -21,41 +21,32 @@ FOR EACH ROW
 EXECUTE FUNCTION check_car_act();
 
 
-SELECT 
-    CASE 
-        WHEN EXISTS (
-            SELECT 1
-            FROM Atti_di_vendita av
-            WHERE av.auto_riferita = a.ID_registrazione
-        ) THEN (
-            SELECT p.ID_Privato_Gruppo, p.nome, p.cognome, p.cf
-            FROM Privati p
-            JOIN Atti_di_vendita av ON av.auto_riferita = p.ID_Privato_Gruppo
-            WHERE av.auto_riferita = a.ID_registrazione
-            ORDER BY av.data_firma DESC
-            LIMIT 1
-        )
-        WHEN EXISTS (
-            SELECT 1
-            FROM Atti_di_trasferimento at
-            WHERE at.auto_riferita = a.ID_registrazione
-        ) THEN (
-            SELECT p.ID_Privato_Gruppo, p.nome, p.cognome, p.cf
-            FROM Privati p
-            JOIN Atti_di_trasferimento at ON at.nuovo_privato = p.ID_Privato_Gruppo
-            WHERE at.auto_riferita = a.ID_registrazione
-            ORDER BY at.data_firma DESC
-            LIMIT 1
-        )
-        ELSE (
-            SELECT pr.nome
-            FROM Modelli m
-            JOIN Produttori pr ON m.nome_produttore = pr.nome
-            WHERE m.nome = a.nome_modello
-        )
-    END AS proprietario
-FROM Automobili a
-WHERE a.ID_registrazione = 'ID_DellAuto';
+
+CREATE OR REPLACE FUNCTION check_maker()
+RETURNS TRIGGER AS $$
+DECLARE
+    auto_produttore VARCHAR;
+BEGIN
+    SELECT m.nome_produttore INTO auto_produttore
+    FROM Automobili a
+    JOIN Modelli m ON a.nome_modello = m.nome
+    WHERE a.ID_registrazione = NEW.auto_riferita;
+
+    IF auto_produttore IS NULL THEN
+        RAISE EXCEPTION 'Errore: L''auto specificata nell''atto non esiste!';
+    ELSIF auto_produttore <> NEW.produttore THEN
+        RAISE EXCEPTION 'Errore: Il produttore che firma l''atto non corrisponde al produttore del modello dell''auto!';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_check_maker
+BEFORE INSERT ON Atti_di_proprieta_iniziale
+FOR EACH ROW
+EXECUTE FUNCTION check_maker();
+
 
 
 
