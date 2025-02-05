@@ -16,48 +16,55 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_check_car_act
-BEFORE INSERT ON Atti_di_fornitura
+BEFORE INSERT ON Atti_di_fornitura (basta cambiare atto)
 FOR EACH ROW
 EXECUTE FUNCTION check_car_act();
 
 
 
-CREATE OR REPLACE FUNCTION check_privates()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.vecchio_privato = NEW.nuovo_privato THEN
-        RAISE EXCEPTION 'Errore: Non è possibile stipulare un atto tra due privati se questi sono la stessa persona';
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_check_privates
-BEFORE INSERT ON Atti_di_trasferimento
-FOR EACH ROW
-EXECUTE FUNCTION check_privates();
 
 
 
-CREATE OR REPLACE FUNCTION check_privates()
-RETURNS TRIGGER AS $$
-BEGIN
-     IF NEW.is_singolo_privato = TRUE THEN
-        IF NEW.nome IS NULL OR NEW.cognome IS NULL OR NEW.cf IS NULL OR NEW.indirizzo IS NULL OR NEW.telefono IS NULL THEN
-            RAISE EXCEPTION 'Errore: Un singolo privato deve avere nome, cognome, codice fiscale, indirizzo e telefono.';
-        END IF;
-    ELSE
-        IF NEW.nome IS NOT NULL OR NEW.cognome IS NOT NULL OR NEW.cf IS NOT NULL OR NEW.indirizzo IS NOT NULL OR NEW.telefono IS NOT NULL THEN
-            RAISE EXCEPTION 'Errore: Un gruppo di privati non può avere nome, cognome, codice fiscale, indirizzo o telefono.';
-        END IF;
-    END IF;
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_check_privates
-BEFORE INSERT ON Privati
-FOR EACH ROW
-EXECUTE FUNCTION check_privates();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ALTER TABLE Privati
+ADD CONSTRAINT check_privato_singolo_gruppo
+CHECK (
+    (is_singolo_privato = TRUE AND nome IS NOT NULL AND cognome IS NOT NULL AND cf IS NOT NULL AND indirizzo IS NOT NULL AND telefono IS NOT NULL) OR
+    (is_singolo_privato = FALSE AND nome IS NULL AND cognome IS NULL AND cf IS NULL AND indirizzo IS NULL AND telefono IS NULL)
+);
+
+ALTER TABLE Atti_di_trasferimento
+ADD CONSTRAINT check_privates_transfer
+CHECK (vecchio_privato <> nuovo_privato);
