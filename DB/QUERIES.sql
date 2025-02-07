@@ -1,52 +1,57 @@
 SET search_path TO progetto_database;
 
 -- Query 1, tutte le automobili di un modello progettato da un produttore che ha progettato almeno 3, massimo 10 modelli:
-SELECT * FROM Automobili A
+SELECT * FROM automobili A
 	WHERE A.nome_modello IN(
-		SELECT nome FROM Modelli
-			GROUP BY nome_produttore
-			HAVING COUNT(*) BETWEEN 3 AND 10
-	)
+		SELECT M.nome FROM modelli M
+			WHERE M.nome_produttore IN(
+				SELECT M2.nome_produttore FROM modelli M2
+					GROUP BY M2.nome_produttore
+					HAVING COUNT(*) BETWEEN 3 AND 10
+			)
+	);
 
--- Query 2, Il numero medio di atti di vendita tra i privati che coinvolgono solo automobili del modello 'Fiesta':
-SELECT AVG(COUNT(A.ID_registrazione)) FROM Atti_trasferimento A_T
-	JOIN Automobili A ON A_T.auto_riferita = A.ID_registrazione
-	WHERE A.nome_modello = 'Fiesta'
-	GROUP BY A.ID_Registrazione;
+-- Query 2, Il numero medio di passaggi di proprietà tra privati che coinvolgono solo automobili del modello 'Fiesta':
+SELECT AVG(n_passaggi_tra_privati) FROM (
+	SELECT A.id_registrazione, COUNT(A.id_registrazione) AS n_passaggi_tra_privati FROM automobili A
+		JOIN atti_trasferimento A_T ON A_T.automobile = A.id_registrazione
+		WHERE A.nome_modello = 'Fiesta'
+		GROUP BY A.id_registrazione
+);
 
 -- Query 3, il numero di modelli con esattamente 100 automobili registrate:
-SELECT COUNT(M.nome) FROM Modelli M
-	WHERE M.nome IN(
-		SELECT A.nome_modello FROM Automobili A
-			GROUP BY A.nome_modello
-			HAVING COUNT(*)=100
-	)
-	GROUP BY M.nome;
+SELECT COUNT(*) FROM (
+	SELECT A.nome_modello FROM Automobili A
+		GROUP BY A.nome_modello
+		HAVING COUNT(*)=100
+);
 
 -- Query 4, tutte le automobili che abbiano 2 o più atti (oltre a quello iniziale, ossia che dal produttore siano arrivate a un privato o gruppo) e che appartengono ad un modello che abbia più di 1500cc di cilindrata:
-SELECT * FROM Automobili A
-JOIN Modelli M ON A.nome_modello = M.nome
-WHERE A.id_registrazione IN (
-    SELECT auto_riferita FROM Atti_di_fornitura
-    INTERSECT
-    SELECT auto_riferita FROM Atti_di_vendita
-)
-AND M.cilindrata > 1500
+SELECT * FROM automobili A
+	JOIN modelli M ON A.nome_modello = M.nome
+	WHERE A.id_registrazione IN (
+		SELECT DISTINCT automobile FROM atti_vendita
+	)
+	AND M.cilindrata > 1500;
 
--- Query 5, il modello o i modelli che hanno il maggior numero di auto distrutte:
-CREATE VIEW modelli_AutoDist(nomeModello,numAutoDist) AS 
+-- Query 5, il modello o i modelli che hanno il minor numero di auto distrutte:
+CREATE VIEW modelli_AutoDist(nomeModello, numAutoDist) AS 
     SELECT nome_modello, count(*) AS numAutoDist
-    FROM Automobile A
+    FROM automobili A
     WHERE A.data_distruzione IS NOT NULL
     GROUP BY nome_modello;
 
 SELECT nomeModello FROM modelli_AutoDist MAD
-WHERE MAD.numAutoDist >= ALL(SELECT numAutoDist FROM modelli_AutoDist);
+WHERE MAD.numAutoDist <= ALL(SELECT numAutoDist FROM modelli_AutoDist);
 
 -- Query 6, il o i modelli che hanno il maggior numero di auto vendute:
-SELECT nome_modello FROM (
-	SELECT A.nome_modello, COUNT(A.nome_modello) AS vendite FROM Automobile A
-		JOIN Atti_vendita A_V ON A.ID_registrazione = A_V.auto
-		GROUP BY A.nome_modello
-	)
-	WHERE vendite = MAX(vendite);
+CREATE VIEW modelli_auto_vend(nome_modello, num_auto_vend) AS 
+	SELECT nome_modello, count(*) AS num_auto_vend FROM automobili A
+		JOIN atti_vendita A_V ON A.id_registrazione = A_V.automobile
+		GROUP BY A.nome_modello;
+
+SELECT MAV.nome_modello FROM modelli_auto_vend MAV
+	WHERE MAV.num_auto_vend >= ALL(SELECT num_auto_vend FROM modelli_auto_vend);
+
+
+DROP VIEW modelli_AutoVend, modelli_AutoDist;
