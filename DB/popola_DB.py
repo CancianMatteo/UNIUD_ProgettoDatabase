@@ -20,7 +20,7 @@ def generate_automobili():
         n_automobili[pos_produttore] += 1
         n_serie_dal_produttore = pos_produttore * 10000 + n_automobili[pos_produttore]
         anno_produzione = random.randint(1970, 2020)
-        data_distruzione = None if random.random() > 0.1 else (datetime.date(anno_produzione, 1, 1) + datetime.timedelta(days=random.randint(366, 6000)))
+        data_distruzione = None if random.random() > 0.1 else (datetime.date(anno_produzione, 1, 1) + datetime.timedelta(days=random.randint(366, 10000)))   # non si distruggono auto nell'anno di creazione
         automobili.append((id_registrazione, n_serie_dal_produttore, anno_produzione, str(data_distruzione), str(modello)))
     return automobili
 
@@ -30,19 +30,28 @@ def generate_atti_proprieta_iniziale(automobili:list):
     for i in range(1, 50001):
         automobile = automobili.pop(0)
         id_atto = i
-        data_firmato = datetime.date(automobile[2], random.randint(1, 12), random.randint(1, 28))
+        data_firmato = datetime.date(automobile[2], 1, 1) + datetime.timedelta(days=random.randint(0, 365))
         id_auto = automobile[0]
         produttore = modello_produttore.get(automobile[4])
         atti_proprieta_iniziale.append((id_atto, str(data_firmato), id_auto, str(produttore)))
     return atti_proprieta_iniziale
 
 
-def generate_atti_fornitura(atti_proprieta_iniziale:list, rivenditori):
+def generate_atti_fornitura(atti_proprieta_iniziale:list, automobili:list, rivenditori):
     atti_fornitura = []
-    for i in range(1, 47001):
+    for i in range(1, 48001):
         atto_iniziale = atti_proprieta_iniziale.pop(0)
         id_atto = i
-        data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(0, 365))
+        data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(0, 500))
+        if automobili[atto_iniziale[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_iniziale[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_iniziale = atti_proprieta_iniziale.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(0, 500))
+                if automobili[atto_iniziale[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_iniziale[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_iniziale[2]
         produttore = atto_iniziale[3]
         rivenditore = random.choice(rivenditori)
@@ -50,12 +59,21 @@ def generate_atti_fornitura(atti_proprieta_iniziale:list, rivenditori):
     return atti_fornitura
 
 
-def generate_atti_vendita_riv_to_priv(atti_fornitura:list, privati):
+def generate_atti_vendita_riv_to_priv(atti_fornitura:list, automobili:list, privati):
     atti_vendita = []
     for i in range(1, 45001):
         atto_fornitura = atti_fornitura.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_fornitura[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 1000))
+        if automobili[atto_fornitura[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_fornitura[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_iniziale = atti_fornitura.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 1000))
+                if automobili[atto_fornitura[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_fornitura[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_fornitura[2]
         rivenditore = atto_fornitura[4]
         privato = random.choice(privati)
@@ -63,12 +81,21 @@ def generate_atti_vendita_riv_to_priv(atti_fornitura:list, privati):
         atti_vendita.append((id_atto, str(data_firmato), id_auto, str(rivenditore), privato, senso_rivenditore_to_privato))
     return atti_vendita
 
-def generate_atti_vendita_priv_to_riv(atti_vendita:list):
+def generate_atti_vendita_priv_to_riv(atti_vendita:list, automobili:list):
     atti_riacquisto = []
     for i in range(45001, 53001):
         atto_vendita = atti_vendita.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_vendita[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
+        if automobili[atto_vendita[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_vendita[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_iniziale = atti_vendita.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
+                if automobili[atto_vendita[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_vendita[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_vendita[2]
         rivenditore = atto_vendita[3]
         privato = atto_vendita[4]
@@ -76,12 +103,21 @@ def generate_atti_vendita_priv_to_riv(atti_vendita:list):
         atti_riacquisto.append((id_atto, str(data_firmato), id_auto, str(rivenditore), privato, senso_rivenditore_to_privato))
     return atti_riacquisto
 
-def generate_atti_vendita_riv_to_priv2(atti_riaquisto:list, privati):
+def generate_atti_vendita_riv_to_priv2(atti_riaquisto:list, automobili:list, privati):
     atti_rivendita = []
     for i in range(53001, 60001):
         atto_riaquisto = atti_riaquisto.pop(0)
         id_atto = i
-        data_firmato = datetime.datetime.strptime(atto_riaquisto[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 300))
+        data_firmato = datetime.datetime.strptime(atto_riaquisto[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 100))
+        if automobili[atto_riaquisto[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_riaquisto[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_iniziale = atti_riaquisto.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 100))
+                if automobili[atto_riaquisto[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_riaquisto[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_riaquisto[2]
         rivenditore = atto_riaquisto[3]
         privato = random.choice(privati)
@@ -90,12 +126,21 @@ def generate_atti_vendita_riv_to_priv2(atti_riaquisto:list, privati):
     return atti_rivendita
 
 
-def generate_atti_trasferimento1(atti_vendita:list, privati):
+def generate_atti_trasferimento1(atti_vendita:list, automobili:list, privati):
     atti_trasferimento1 = []
-    for i in range(1, 40001):
+    for i in range(1, 35001):
         atto_vendita = atti_vendita.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_vendita[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
+        if automobili[atto_vendita[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_vendita[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_vendita = atti_vendita.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_vendita[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
+                if automobili[atto_vendita[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_vendita[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_vendita[2]
         vecchio_privato = atto_vendita[4]
         nuovo_privato = random.choice(privati)
@@ -104,12 +149,21 @@ def generate_atti_trasferimento1(atti_vendita:list, privati):
         atti_trasferimento1.append((id_atto, str(data_firmato), id_auto, vecchio_privato, nuovo_privato))
     return atti_trasferimento1
 
-def generate_atti_trasferimento2(atti_trasferimento1:list, privati):
+def generate_atti_trasferimento2(atti_trasferimento1:list, automobili:list, privati):
     atti_trasferimento2 = []
-    for i in range(40001, 65001):
+    for i in range(35001, 60001):
         atto_trasferimento1 = atti_trasferimento1.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_trasferimento1[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(100, 1000))
+        if automobili[atto_trasferimento1[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_trasferimento1[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_trasferimento1 = atti_trasferimento1.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_trasferimento1[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(100, 1000))
+                if automobili[atto_trasferimento1[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_trasferimento1[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_trasferimento1[2]
         vecchio_privato = atto_trasferimento1[4]
         nuovo_privato = random.choice(privati)
@@ -118,12 +172,21 @@ def generate_atti_trasferimento2(atti_trasferimento1:list, privati):
         atti_trasferimento2.append((id_atto, str(data_firmato), id_auto, vecchio_privato, nuovo_privato))
     return atti_trasferimento2
 
-def generate_atti_trasferimento3(atti_trasferimento2:list, privati):
+def generate_atti_trasferimento3(atti_trasferimento2:list, automobili:list, privati):
     atti_trasferimento3 = []
-    for i in range(65001, 76001):
+    for i in range(60001, 76001):
         atto_trasferimento2 = atti_trasferimento2.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_trasferimento2[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(100, 1000))
+        if automobili[atto_trasferimento2[2]-1][3] != 'None':
+            data_distruzione = datetime.datetime.strptime(automobili[atto_trasferimento2[2]-1][3], '%Y-%m-%d').date()
+            while data_firmato > data_distruzione:
+                atto_trasferimento2 = atti_trasferimento2.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_trasferimento2[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(100, 1000))
+                if automobili[atto_trasferimento2[2]-1][3] != 'None':
+                    data_distruzione = datetime.datetime.strptime(automobili[atto_trasferimento2[2]-1][3], '%Y-%m-%d').date()
+                else:
+                    break
         id_auto = atto_trasferimento2[2]
         vecchio_privato = atto_trasferimento2[4]
         nuovo_privato = random.choice(privati)
@@ -167,27 +230,27 @@ def main():
     atti_proprieta_iniziale = generate_atti_proprieta_iniziale(automobili_deep_copy)
 
     atti_proprieta_iniziale_deep_copy = copy.deepcopy(atti_proprieta_iniziale)
-    atti_fornitura = generate_atti_fornitura(atti_proprieta_iniziale_deep_copy, rivenditori)
+    atti_fornitura = generate_atti_fornitura(atti_proprieta_iniziale_deep_copy, automobili, rivenditori)
 
     atti_fornitura_deep_copy = copy.deepcopy(atti_fornitura)
-    atti_vendita = generate_atti_vendita_riv_to_priv(atti_fornitura_deep_copy, privati)
+    atti_vendita = generate_atti_vendita_riv_to_priv(atti_fornitura_deep_copy, automobili, privati)
     atti_vendita_deep_copy = copy.deepcopy(atti_vendita)
     # per praticità le concessionarie riaquistano solo le auto vendute da loro che non hanno avuto altri proprietari oltre all'acquirente
-    atti_riacquisto = generate_atti_vendita_priv_to_riv(atti_vendita_deep_copy)
+    atti_riacquisto = generate_atti_vendita_priv_to_riv(atti_vendita_deep_copy, automobili)
     atti_riaquisto_deep_copy = copy.deepcopy(atti_riacquisto)
-    atti_rivendita = generate_atti_vendita_riv_to_priv2(atti_riaquisto_deep_copy, privati)
+    atti_rivendita = generate_atti_vendita_riv_to_priv2(atti_riaquisto_deep_copy, automobili, privati)
     atti_vendita_TOT = atti_vendita + atti_riacquisto + atti_rivendita
     
     atti_rivendita_deep_copy = copy.deepcopy(atti_rivendita)
-    atti_trasferimento1 = generate_atti_trasferimento1(atti_vendita_deep_copy+atti_rivendita_deep_copy, privati)
+    atti_trasferimento1 = generate_atti_trasferimento1(atti_vendita_deep_copy+atti_rivendita_deep_copy, automobili, privati)
     atti_trasferimento1_deep_copy = copy.deepcopy(atti_trasferimento1)
-    atti_trasferimento2 = generate_atti_trasferimento2(atti_trasferimento1_deep_copy, privati)
+    atti_trasferimento2 = generate_atti_trasferimento2(atti_trasferimento1_deep_copy, automobili, privati)
     atti_trasferimento2_deep_copy = copy.deepcopy(atti_trasferimento2)
-    atti_trasferimento3 = generate_atti_trasferimento3(atti_trasferimento2_deep_copy, privati)
+    atti_trasferimento3 = generate_atti_trasferimento3(atti_trasferimento2_deep_copy, automobili, privati)
     atti_trasferimento_TOT = atti_trasferimento1 + atti_trasferimento2 + atti_trasferimento3
 
     write_inserts_to_file('DB/popolazione_DB_py.sql', 'produttori', ['nome', 'n_auto_prodotte'], produzione)
-    write_inserts_to_file('DB/popolazione_DB_py.sql', 'automobili', ['id_registrazione', 'n_serie_dal_produttore', 'anno_produzione', 'data_registrazione', 'data_distruzione', 'nome_modello'], automobili)
+    write_inserts_to_file('DB/popolazione_DB_py.sql', 'automobili', ['id_registrazione', 'n_serie_dal_produttore', 'anno_produzione', 'data_distruzione', 'nome_modello'], automobili)
     write_inserts_to_file('DB/popolazione_DB_py.sql', 'atti_proprieta_iniziale', ['id_atto', 'data_firmato', 'automobile', 'produttore'], atti_proprieta_iniziale)
     write_inserts_to_file('DB/popolazione_DB_py.sql', 'atti_fornitura', ['id_atto', 'data_firmato', 'automobile', 'produttore', 'rivenditore'], atti_fornitura)
     write_inserts_to_file('DB/popolazione_DB_py.sql', 'atti_vendita', ['id_atto', 'data_firmato', 'automobile', 'rivenditore', 'privato', 'senso_rivenditore_to_privato'], atti_vendita_TOT)

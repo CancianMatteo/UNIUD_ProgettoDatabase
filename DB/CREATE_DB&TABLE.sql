@@ -2,7 +2,7 @@
 
 SET search_path TO progetto_database;
 
-DROP TABLE IF EXISTS produttori, modelli, automobili, rivenditori, privati, atti_proprieta_iniziale, atti_fornitura, atti_vendita, atti_trasferimento;
+DROP TABLE IF EXISTS atti_trasferimento, atti_vendita, atti_fornitura, atti_proprieta_iniziale, automobili, modelli, produttori, rivenditori, privati CASCADE;
 
 CREATE TABLE produttori(
 	nome varchar PRIMARY KEY,
