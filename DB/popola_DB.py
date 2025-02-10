@@ -43,12 +43,12 @@ def generate_atti_fornitura(atti_proprieta_iniziale:list, automobili:list, riven
         atto_iniziale = atti_proprieta_iniziale.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(0, 500))
-        if automobili[atto_iniziale[2]-1][3] != 'None':
+        if automobili[atto_iniziale[2]-1][3] != 'None':         #se l'auto è stata distrutta
             data_distruzione = datetime.datetime.strptime(automobili[atto_iniziale[2]-1][3], '%Y-%m-%d').date()
             while data_firmato > data_distruzione:
                 atto_iniziale = atti_proprieta_iniziale.pop(0)
                 data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(0, 500))
-                if automobili[atto_iniziale[2]-1][3] != 'None':
+                if automobili[atto_iniziale[2]-1][3] != 'None':     #se l'auto è stata distrutta
                     data_distruzione = datetime.datetime.strptime(automobili[atto_iniziale[2]-1][3], '%Y-%m-%d').date()
                 else:
                     break
@@ -65,12 +65,12 @@ def generate_atti_vendita_riv_to_priv(atti_fornitura:list, automobili:list, priv
         atto_fornitura = atti_fornitura.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_fornitura[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 1000))
-        if automobili[atto_fornitura[2]-1][3] != 'None':
+        if automobili[atto_fornitura[2]-1][3] != 'None':        #se l'auto è stata distrutta
             data_distruzione = datetime.datetime.strptime(automobili[atto_fornitura[2]-1][3], '%Y-%m-%d').date()
             while data_firmato > data_distruzione:
-                atto_iniziale = atti_fornitura.pop(0)
-                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 1000))
-                if automobili[atto_fornitura[2]-1][3] != 'None':
+                atto_fornitura = atti_fornitura.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_fornitura[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 1000))
+                if automobili[atto_fornitura[2]-1][3] != 'None':     #se l'auto è stata distrutta
                     data_distruzione = datetime.datetime.strptime(automobili[atto_fornitura[2]-1][3], '%Y-%m-%d').date()
                 else:
                     break
@@ -87,12 +87,12 @@ def generate_atti_vendita_priv_to_riv(atti_vendita:list, automobili:list):
         atto_vendita = atti_vendita.pop(0)
         id_atto = i
         data_firmato = datetime.datetime.strptime(atto_vendita[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
-        if automobili[atto_vendita[2]-1][3] != 'None':
+        if automobili[atto_vendita[2]-1][3] != 'None':      #se l'auto è stata distrutta
             data_distruzione = datetime.datetime.strptime(automobili[atto_vendita[2]-1][3], '%Y-%m-%d').date()
             while data_firmato > data_distruzione:
-                atto_iniziale = atti_vendita.pop(0)
-                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
-                if automobili[atto_vendita[2]-1][3] != 'None':
+                atto_vendita = atti_vendita.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_vendita[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(10, 3000))
+                if automobili[atto_vendita[2]-1][3] != 'None':     #se l'auto è stata distrutta
                     data_distruzione = datetime.datetime.strptime(automobili[atto_vendita[2]-1][3], '%Y-%m-%d').date()
                 else:
                     break
@@ -112,8 +112,8 @@ def generate_atti_vendita_riv_to_priv2(atti_riaquisto:list, automobili:list, pri
         if automobili[atto_riaquisto[2]-1][3] != 'None':
             data_distruzione = datetime.datetime.strptime(automobili[atto_riaquisto[2]-1][3], '%Y-%m-%d').date()
             while data_firmato > data_distruzione:
-                atto_iniziale = atti_riaquisto.pop(0)
-                data_firmato = datetime.datetime.strptime(atto_iniziale[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 100))
+                atto_riaquisto = atti_riaquisto.pop(0)
+                data_firmato = datetime.datetime.strptime(atto_riaquisto[1], '%Y-%m-%d').date() + datetime.timedelta(days=random.randint(1, 100))
                 if automobili[atto_riaquisto[2]-1][3] != 'None':
                     data_distruzione = datetime.datetime.strptime(automobili[atto_riaquisto[2]-1][3], '%Y-%m-%d').date()
                 else:

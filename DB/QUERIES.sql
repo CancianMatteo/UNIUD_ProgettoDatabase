@@ -55,3 +55,10 @@ SELECT MAV.nome_modello FROM modelli_auto_vend MAV
 
 
 DROP VIEW modelli_AutoVend, modelli_AutoDist;
+
+-- Query 7, tutti i privati proprietari dell'auto con id_registrazione = 107
+SELECT A_T.nuovo_privato FROM atti_trasferimento A_T
+	WHERE A_T.automobile = 107
+UNION
+SELECT A_V.privato FROM atti_vendita A_V
+	WHERE A_V.automobile = 107;

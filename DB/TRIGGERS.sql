@@ -91,27 +91,24 @@ DECLARE proprietario_attuale INT;
 BEGIN
     -- Cerca il proprietario attuale nel più recente atto di trasferimento
     SELECT nuovo_privato INTO proprietario_attuale
-        FROM atti_trasferimento A_T1
-        WHERE automobile = NEW.automobile AND NOT EXISTS (
-            --Atti di trasferimento che riguardano la stessa auto con data_firmato successiva al primo
-            SELECT * FROM atti_trasferimento A_T2
-                WHERE A_T2.automobile = NEW.automobile AND A_T1.data_firmato < A_T2.data_firmato
-        );
+        FROM atti_trasferimento
+        WHERE automobile = NEW.automobile
+        ORDER BY data_firmato DESC
+        LIMIT 1;
 
     -- Se non ci sono atti di trasferimento per quell'auto, cercalo nel più recente atto di vendita
     IF (proprietario_attuale IS NULL) 
     THEN
         SELECT privato INTO proprietario_attuale
-            FROM atti_vendita A_V1
-            WHERE automobile = NEW.automobile AND senso_rivenditore_to_privato = TRUE AND NOT EXISTS (
-                --Atti di riacquisto da parte della concessionaria che riguardano la stessa auto con data_firmato successiva alla vendita
-                SELECT * FROM atti_vendita A_V2
-                WHERE A_V2.automobile = NEW.automobile AND A_V2.senso_rivenditore_to_privato = FALSE AND A_V1.data_firmato < A_V2.data_firmato
-            );
+            FROM atti_vendita
+            WHERE automobile = NEW.automobile AND senso_rivenditore_to_privato = TRUE
+            ORDER BY data_firmato DESC
+            LIMIT 1;
     END IF;
 
     IF proprietario_attuale <> NEW.vecchio_privato THEN
-        RAISE EXCEPTION 'Errore: Il vecchio proprietario specificato nell''atto non corrisponde al proprietario dell''auto!';
+        RAISE EXCEPTION 'Errore: Il vecchio_proprietario(%) specificato nell''atto non corrisponde al proprietario dell''auto (%)!
+        Atto trasferimento fallito: %', NEW.vecchio_privato, proprietario_attuale, NEW;
     END IF;
 
     RETURN NEW;
