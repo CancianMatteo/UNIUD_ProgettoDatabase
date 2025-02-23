@@ -23,6 +23,12 @@ vita_auto <- merge(auto_produzione, auto_distruzione, by="id_auto", all.x=TRUE)
 vita_auto$durata <- as.numeric(difftime(as.Date(vita_auto$data_distruzione), as.Date(vita_auto$data_produzione), units = "days"))
 boxplot(vita_auto$durata, main = "Distribuzione durata delle automobili", ylab = "Durata [giorni]")
 
-# boxplot: numero di passaggi di proprietà di ogni auto del modello 'Fiesta' tra privati (query 2)
-trasferimenti_fiesta <- dbGetQuery(con, "SELECT A.id_registrazione, COUNT(A.id_registrazione) AS n_passaggi_tra_privati FROM automobili A JOIN atti_trasferimento A_T ON A_T.automobile = A.id_registrazione WHERE A.nome_modello = 'Fiesta' GROUP BY A.id_registrazione;")
-boxplot(trasferimenti_fiesta$n_passaggi_tra_privati, main = "n Trasferimenti tra privati")
+# boxplot: numero di passaggi di proprietà di ogni auto tra privati (~query 2)
+trasferimenti_per_auto <- dbGetQuery(con, "
+    SELECT A.id_registrazione, COUNT(A_T.automobile) AS n_passaggi_tra_privati FROM automobili A
+		    LEFT JOIN atti_trasferimento A_T ON A.id_registrazione = A_T.automobile
+		    WHERE A.nome_modello = 'Fiesta'
+        GROUP BY A.id_registrazione;
+    ")
+print(median(trasferimenti_per_auto$n_passaggi_tra_privati))
+boxplot(trasferimenti_per_auto$n_passaggi_tra_privati, main = "n Trasferimenti tra privati per auto", ylim = c(0, 4))

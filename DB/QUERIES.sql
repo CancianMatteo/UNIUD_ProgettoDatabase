@@ -13,8 +13,8 @@ SELECT * FROM automobili A
 
 -- Query 2, Il numero medio di passaggi di proprietà tra privati che coinvolgono solo automobili del modello 'Fiesta':
 SELECT AVG(n_passaggi_tra_privati) FROM (
-	SELECT A.id_registrazione, COUNT(A.id_registrazione) AS n_passaggi_tra_privati FROM automobili A
-		JOIN atti_trasferimento A_T ON A_T.automobile = A.id_registrazione
+	SELECT A.id_registrazione, COUNT(A_T.automobile) AS n_passaggi_tra_privati FROM automobili A
+		LEFT JOIN atti_trasferimento A_T ON A.id_registrazione = A_T.automobile
 		WHERE A.nome_modello = 'Fiesta'
 		GROUP BY A.id_registrazione
 );
