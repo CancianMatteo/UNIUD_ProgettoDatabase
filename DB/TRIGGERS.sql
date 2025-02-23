@@ -1,4 +1,4 @@
--- Trigger1: quando viene aggiunta un auto viene incrementato il numero di auto prodotte dal produttore
+-- Trigger1: quando viene aggiunta un'auto viene incrementato il numero di auto prodotte dal produttore
 CREATE FUNCTION incrementa_auto_prodotte()
 RETURNS TRIGGER AS $$
 DECLARE n_auto INT;
@@ -39,22 +39,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_check_auto_distruzione_proprieta_iniziale
-BEFORE INSERT ON atti_proprieta_iniziale
+BEFORE INSERT OR UPDATE ON atti_proprieta_iniziale
 FOR EACH ROW
 EXECUTE FUNCTION check_auto_distruzione();
 
 CREATE TRIGGER trg_check_auto_distruzione_fornitura
-BEFORE INSERT ON atti_fornitura
+BEFORE INSERT OR UPDATE ON atti_fornitura
 FOR EACH ROW
 EXECUTE FUNCTION check_auto_distruzione();
 
 CREATE TRIGGER trg_check_auto_distruzione_vendita
-BEFORE INSERT ON atti_vendita
+BEFORE INSERT OR UPDATE ON atti_vendita
 FOR EACH ROW
 EXECUTE FUNCTION check_auto_distruzione();
 
 CREATE TRIGGER trg_check_auto_distruzione_trasferimento
-BEFORE INSERT ON atti_trasferimento
+BEFORE INSERT OR UPDATE ON atti_trasferimento
 FOR EACH ROW
 EXECUTE FUNCTION check_auto_distruzione();
 
