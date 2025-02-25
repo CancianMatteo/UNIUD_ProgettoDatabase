@@ -26,9 +26,9 @@ boxplot(vita_auto$durata, main = "Distribuzione durata delle automobili", ylab =
 # boxplot: numero di passaggi di proprietà di ogni auto tra privati (~query 2)
 trasferimenti_per_auto <- dbGetQuery(con, "
     SELECT A.id_registrazione, COUNT(A_T.automobile) AS n_passaggi_tra_privati FROM automobili A
-		    LEFT JOIN atti_trasferimento A_T ON A.id_registrazione = A_T.automobile
-		    WHERE A.nome_modello = 'Fiesta'
+        LEFT JOIN atti_trasferimento A_T ON A.id_registrazione = A_T.automobile
+        WHERE A.nome_modello = 'Fiesta'
         GROUP BY A.id_registrazione;
     ")
 print(median(trasferimenti_per_auto$n_passaggi_tra_privati))
-boxplot(trasferimenti_per_auto$n_passaggi_tra_privati, main = "n Trasferimenti tra privati per auto", ylim = c(0, 4))
+boxplot(trasferimenti_per_auto$n_passaggi_tra_privati, main = "n Trasferimenti tra privati per auto (del modello Fiesta)", ylim = c(0, 4))
